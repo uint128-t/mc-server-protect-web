@@ -90,16 +90,14 @@ def handle_client(conn, addr):
         next_state = read_varint(conn)
         if next_state == 1: # Server Ping
             answer_serverping(conn)
-            conn.close()
-            return
+            raise Exception
         print(f"Handshake: version={protocol_version}, address={server_address}, port={server_port}, state={next_state}")
         
         # Read Login Start packet
         length = read_varint(conn)
         packet_id = read_varint(conn)
         if packet_id != 0x00:
-            conn.close()
-            return
+            raise Exception
         username = read_string(conn)
         # Get Client UUID
         cuuid = read_fully(conn,16)
