@@ -124,6 +124,7 @@ def handle_client(conn, addr):
             w_u8(TAG_End)
         )
         send_packet(conn,0x02, disconnect_packet)
+        raise Exception
     except:
         conn_ips.discard(addr[0])
         conn.close()
@@ -145,6 +146,8 @@ def runx(port):
                 conn_ips.add(addr[0])
                 # Anti slow-loris: only allow one connection per IP
                 threading.Thread(target=handle_client,args=(conn,addr),daemon=True).start()
+            else:
+                print("Too many connections from this IP or total connections, rejecting")
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
 threading.Thread(target=runx,args=(25565,),daemon=True).start()
