@@ -69,6 +69,7 @@ def proxy_client(conn):
     proxy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     proxy.connect(("127.0.0.1",25564))
     proxy.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    proxy.settimeout(5)
     threading.Thread(target=client2serv,args=(conn,proxy),daemon=True).start()
     threading.Thread(target=unidirectional_proxy,args=(proxy,conn),daemon=True).start()
 
@@ -139,6 +140,7 @@ def runx(port):
         print(f"Server listening on port {HOST}:{port}")
         while True:
             conn, addr = s.accept()
+            conn.settimeout(5)
             print(f"Request from {addr}")
             if login.ip_logged_in(addr[0]):
                 proxy_client(conn)
