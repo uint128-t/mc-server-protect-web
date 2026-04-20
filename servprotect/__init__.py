@@ -72,6 +72,8 @@ def proxy_client(conn):
     threading.Thread(target=client2serv,args=(conn,proxy),daemon=True).start()
     threading.Thread(target=unidirectional_proxy,args=(proxy,conn),daemon=True).start()
 
+conn_ips = set()
+
 def handle_client(conn, addr):
     try:
         conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -125,6 +127,7 @@ def handle_client(conn, addr):
         )
         send_packet(conn,0x02, disconnect_packet)
     except:
+        conn_ips.discard(addr[0])
         conn.close()
 
 def runx(port):
@@ -140,7 +143,9 @@ def runx(port):
             print(f"Request from {addr}")
             if login.ip_logged_in(addr[0]):
                 proxy_client(conn)
-            else:
+            elif (addr[0] not in conn_ips) and len(conn_ips)<10: # Limit 10 connections in total to prevent DoS
+                conn_ips.add(addr[0])
+                # Anti slow-loris: only allow one connection per IP
                 threading.Thread(target=handle_client,args=(conn,addr),daemon=True).start()
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
