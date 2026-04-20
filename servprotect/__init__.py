@@ -69,7 +69,8 @@ def proxy_client(conn):
     proxy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     proxy.connect(("127.0.0.1",25564))
     proxy.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    proxy.settimeout(5)
+    proxy.settimeout(60*20)
+    conn.settimeout(60*20)
     threading.Thread(target=client2serv,args=(conn,proxy),daemon=True).start()
     threading.Thread(target=unidirectional_proxy,args=(proxy,conn),daemon=True).start()
 
