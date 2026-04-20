@@ -1,0 +1,21 @@
+{
+    "version": {
+        "name": "Proxy",
+        "protocol": 767
+    },
+    "players": {
+        "max": 20,
+        "online": 1,
+        "sample": [
+            {
+                "name": "§k1234",
+                "id": "00000000-0000-0000-0000-000000000000"
+            }
+        ]
+    },
+    "description": {
+        "text": "Please log in to see the server status"
+    },
+    "favicon": "data:image/png;base64,d",
+    "enforcesSecureChat": false
+}
