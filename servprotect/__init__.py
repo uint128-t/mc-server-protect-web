@@ -93,7 +93,7 @@ def unidirectional_proxy(src,dst):
 def proxy_client(conn):
     conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     proxy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    proxy.connect(("127.0.0.1",25564))
+    proxy.connect(("127.0.0.1",config.GAME_PORT))
     proxy.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     threading.Thread(target=client2serv,args=(conn,proxy),daemon=True).start()
     threading.Thread(target=unidirectional_proxy,args=(proxy,conn),daemon=True).start()
@@ -119,7 +119,7 @@ def runx(port):
             proxy_client(conn)
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
-PORT = int(os.environ.get("PORT",25565))
+PORT = config.PROXY_PORT
 print(f"Proxy listening on port {PORT}")
 threading.Thread(target=runx,args=(PORT,),daemon=True).start()
 threading.Thread(target=console.prompt,daemon=True).start()
