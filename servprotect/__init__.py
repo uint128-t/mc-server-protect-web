@@ -1,3 +1,5 @@
+import os
+
 from . import webserv
 
 from .protocol import *
@@ -104,6 +106,8 @@ def runx(port):
             proxy_client(conn)
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
-threading.Thread(target=runx,args=(25565,),daemon=True).start()
+PORT = os.environ.get("PORT",25565)
+print(f"Starting server on port {PORT}")
+threading.Thread(target=runx,args=(PORT,),daemon=True).start()
 threading.Thread(target=shell.shell,daemon=True).start()
 app = webserv.app
