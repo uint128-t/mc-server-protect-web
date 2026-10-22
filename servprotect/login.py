@@ -5,17 +5,19 @@ import hashlib
 import sqlite3
 from . import console
 
-con = sqlite3.connect("passwords.db")
+con = sqlite3.connect("passwords.db",check_same_thread=False)
 db = con.cursor()
 db.execute("CREATE TABLE IF NOT EXISTS login (user TEXT PRIMARY KEY, password TEXT)")
+database_lock = threading.Lock()
 
 def set_passsword(user,password):
     password = hash_password(password)
     set_hashed_password(user,password)
 
 def set_hashed_password(user,hashed):
-    db.execute("INSERT OR REPLACE INTO login (user,password) VALUES (?,?)",(user,hashed))
-    con.commit()
+    with database_lock:
+        db.execute("INSERT OR REPLACE INTO login (user,password) VALUES (?,?)",(user,hashed))
+        con.commit()
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -42,7 +44,8 @@ def login(user,code,address,bypass=False):
     global logout_queue
     # Simplified login logic - replace with actual authentication
     code = hash_password(code)
-    res = db.execute("SELECT user FROM login WHERE user=? AND password=?", (user, code)).fetchone()
+    with database_lock:
+        res = db.execute("SELECT user FROM login WHERE user=? AND password=?", (user, code)).fetchone()
     if bypass or res:
         logins[user] = address
         console.log(f"User {user} logged in from {address}")

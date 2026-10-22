@@ -30,6 +30,7 @@ def prompt():
 
 def log(*args):
     print(end="\0337",flush=True)
-    print("\r",flush=True)
-    print(*args,flush=True,end="")
-    print("sp> ",readline.get_line_buffer(),end="\0338",flush=True)
+    print(end="\r",flush=False)
+    print(*args,flush=True)
+    print("sp>",end=readline.get_line_buffer(),flush=True)
+    print(end="\0338",flush=True)

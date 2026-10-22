@@ -105,7 +105,6 @@ def runx(port):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, port))
         s.listen()
-        console.log(f"Server listening on port {HOST}:{port}")
         while True:
             conn, addr = s.accept()
             with connection_lock:
@@ -121,7 +120,7 @@ def runx(port):
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
 PORT = int(os.environ.get("PORT",25565))
-console.log(f"Starting server on port {PORT}")
+print(f"Proxy listening on port {PORT}")
 threading.Thread(target=runx,args=(PORT,),daemon=True).start()
 threading.Thread(target=console.prompt,daemon=True).start()
 app = webserv.app
