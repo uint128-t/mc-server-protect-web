@@ -13,7 +13,7 @@ connection_lock = threading.Lock()
 connection_count = {} # address: count
 connections=0
 
-def client2serv(client,server):
+def client2serv(client,server,addr):
     global connections
     try:
         # Read the handshake
@@ -53,7 +53,7 @@ def client2serv(client,server):
         packid = read_varint(client)
         username = read_string(client)
         ct=read_fully(client,packlen-len(write_varint(packid))-len(write_string(username)))
-        if login.user_logged_in(client.getpeername()[0],username):
+        if login.user_logged_in(addr,username):
             send_packet(server,packid,write_string(username)+ct)
             console.log(f"Proxying {username}")
             unidirectional_proxy(client,server)
@@ -70,7 +70,6 @@ def client2serv(client,server):
         client.close()
         server.close()
         with connection_lock:
-            addr = client.getpeername()[0]
             connection_count[addr]-=1
             if connection_count[addr]==0:
                 del connection_count[addr]
@@ -89,12 +88,12 @@ def unidirectional_proxy(src,dst):
         dst.close()
         return
     
-def proxy_client(conn):
+def proxy_client(conn,addr):
     conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     proxy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     proxy.connect(("127.0.0.1",config.GAME_PORT))
     proxy.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    threading.Thread(target=client2serv,args=(conn,proxy),daemon=True).start()
+    threading.Thread(target=client2serv,args=(conn,proxy,addr),daemon=True).start()
     threading.Thread(target=unidirectional_proxy,args=(proxy,conn),daemon=True).start()
 
 def runx(port):
@@ -115,7 +114,7 @@ def runx(port):
                 connections+=1
             conn.settimeout(5)
             console.log(f"Request from {addr}")
-            proxy_client(conn)
+            proxy_client(conn,addr)
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
 PORT = config.PROXY_PORT
