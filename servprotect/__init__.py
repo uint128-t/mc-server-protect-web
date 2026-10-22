@@ -105,12 +105,13 @@ def runx(port):
         s.listen()
         while True:
             conn, addr = s.accept()
+            addr = addr[0]
             with connection_lock:
-                if connections >= config.MAX_CONNECTIONS or connection_count.get(addr[0],0) >= config.MAX_IP_CONNECTIONS:
-                    console.log(f"Too many connections from {addr[0]}")
+                if connections >= config.MAX_CONNECTIONS or connection_count.get(addr,0) >= config.MAX_IP_CONNECTIONS:
+                    console.log(f"Too many connections from {addr}")
                     conn.close()
                     continue
-                connection_count[addr[0]] = connection_count.get(addr[0],0) + 1
+                connection_count[addr] = connection_count.get(addr,0) + 1
                 connections+=1
             conn.settimeout(5)
             console.log(f"Request from {addr}")
