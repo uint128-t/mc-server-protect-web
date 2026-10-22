@@ -44,8 +44,10 @@ def login(user,code,address,bypass=False):
     global logout_queue
     # Simplified login logic - replace with actual authentication
     code = hash_password(code)
-    with database_lock:
-        res = db.execute("SELECT user FROM login WHERE user=? AND password=?", (user, code)).fetchone()
+    res = None
+    if not bypass:
+        with database_lock:
+            res = db.execute("SELECT user FROM login WHERE user=? AND password=?", (user, code)).fetchone()
     if bypass or res:
         logins[user] = address
         console.log(f"User {user} logged in from {address}")

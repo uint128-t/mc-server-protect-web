@@ -65,7 +65,9 @@ def client2serv(client,server,addr):
                 nbt_string("color","red")+
                 w_u8(TAG_End)
             )
+            disconnect_packet = write_string("\"r\"")
             send_packet(server,0x00, disconnect_packet)
+            console.log(f"Login failed for {username}")
     except:
         pass
     finally:
@@ -116,7 +118,7 @@ def runx(port):
                 connection_count[addr] = connection_count.get(addr,0) + 1
                 connections+=1
             conn.settimeout(5)
-            console.log(f"Request from {addr}")
+            console.log(f"Proxy Request from {addr}")
             proxy_client(conn,addr)
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()

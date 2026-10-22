@@ -3,7 +3,7 @@ import flask
 app = flask.Flask(__name__)
 @app.route("/")
 def index():
-    console.log("Request from",flask.request.remote_addr)
+    console.log("HTTP Request from",flask.request.remote_addr)
     return flask.send_file("index.html")
 @app.route("/login", methods=["POST"])
 def login_post():
