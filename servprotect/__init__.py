@@ -66,8 +66,7 @@ def client2serv(client,server):
                 w_u8(TAG_End)
             )
             send_packet(server,0x02, disconnect_packet)
-            raise Exception
-    except:
+    finally:
         client.close()
         server.close()
         with connection_lock:
