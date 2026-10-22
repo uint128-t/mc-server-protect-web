@@ -11,7 +11,7 @@ db.execute("CREATE TABLE IF NOT EXISTS login (user TEXT PRIMARY KEY, password TE
 def set_passsword(user,password):
     password = hash_password(password)
     set_hashed_password(user,password)
-    
+
 def set_hashed_password(user,hashed):
     db.execute("INSERT OR REPLACE INTO login (user,password) VALUES (?,?)",(user,hashed))
     con.commit()
@@ -26,7 +26,9 @@ def user_logged_in(address,user):
 logout_queue = deque() # (logout_time, user)
 def logout_thread():
     while True:
-        time.sleep(1)
+        if not logout_queue:
+            time.sleep(1)
+            continue
         now = time.monotonic()
         lgt,usr = logout_queue.popleft()
         time.sleep(max(0,lgt-now))
