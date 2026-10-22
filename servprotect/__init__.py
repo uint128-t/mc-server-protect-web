@@ -1,12 +1,9 @@
 import os
-
-from . import webserv
+import socket
 
 from .protocol import *
-from . import login
 from .nbt import *
-import socket
-import shell
+from . import login,shell,webserv
 
 with open("statusping.json","r") as r:
     status_ping = r.read()
