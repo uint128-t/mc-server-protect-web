@@ -3,6 +3,7 @@ import threading
 import time
 import hashlib
 import sqlite3
+from . import console
 
 con = sqlite3.connect("passwords.db")
 db = con.cursor()
@@ -33,7 +34,7 @@ def logout_thread():
         lgt,usr = logout_queue.popleft()
         time.sleep(max(0,lgt-now))
         logins.pop(usr,None)
-        print(f"User {usr} logged out after timeout")
+        console.log(f"User {usr} logged out after timeout")
 
 threading.Thread(target=logout_thread,daemon=True).start()
 
@@ -44,7 +45,7 @@ def login(user,code,address,bypass=False):
     res = db.execute("SELECT user FROM login WHERE user=? AND password=?", (user, code)).fetchone()
     if bypass or res:
         logins[user] = address
-        print(f"User {user} logged in from {address}")
+        console.log(f"User {user} logged in from {address}")
         logout_queue.append((time.monotonic() + 60, user))  # Logout after 60 seconds
         return user
     return None

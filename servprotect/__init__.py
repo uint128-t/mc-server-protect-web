@@ -31,7 +31,7 @@ def client2serv(client,server):
             write_varint(2) # Force login even if transferring
         )
         if next_state == 1: # Server Ping
-            print("Proxy server ping")
+            console.log("Proxy server ping")
             # Send ping handshake
             send_packet(server,0x00,write_varint(protocol_version)+write_string(server_address)+struct.pack(">H", server_port)+write_varint(1))
             # Read status request
@@ -55,9 +55,9 @@ def client2serv(client,server):
         ct=read_fully(client,packlen-len(write_varint(packid))-len(write_string(username)))
         if login.user_logged_in(client.getpeername()[0],username):
             send_packet(server,packid,write_string(username)+ct)
-            print(f"Proxying {username}")
+            console.log(f"Proxying {username}")
             unidirectional_proxy(client,server)
-            print(f"Connection closed for {username}")
+            console.log(f"Connection closed for {username}")
         else:
             disconnect_packet = (
                 w_u8(TAG_Compound) +
@@ -105,23 +105,23 @@ def runx(port):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, port))
         s.listen()
-        print(f"Server listening on port {HOST}:{port}")
+        console.log(f"Server listening on port {HOST}:{port}")
         while True:
             conn, addr = s.accept()
             with connection_lock:
                 if connections >= config.MAX_CONNECTIONS or connection_count.get(addr[0],0) >= config.MAX_IP_CONNECTIONS:
-                    print(f"Too many connections from {addr[0]}")
+                    console.log(f"Too many connections from {addr[0]}")
                     conn.close()
                     continue
                 connection_count[addr[0]] = connection_count.get(addr[0],0) + 1
                 connections+=1
             conn.settimeout(5)
-            print(f"Request from {addr}")
+            console.log(f"Request from {addr}")
             proxy_client(conn)
 
 # threading.Thread(target=webserv.app.run,kwargs={"host":"0.0.0.0","port":10003},daemon=True).start()
 PORT = int(os.environ.get("PORT",25565))
-print(f"Starting server on port {PORT}")
+console.log(f"Starting server on port {PORT}")
 threading.Thread(target=runx,args=(PORT,),daemon=True).start()
 threading.Thread(target=console.prompt,daemon=True).start()
 app = webserv.app
