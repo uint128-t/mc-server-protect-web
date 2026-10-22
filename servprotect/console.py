@@ -1,14 +1,15 @@
 import readline
+import sys
 from . import login
 
-def shell():
+def prompt():
     while True:
         cmd = input("sp> ").strip().split()
         if not cmd:
             continue
         try:
             if cmd[0]=="exit":
-                return
+                sys.exit(0)
             if cmd[0]=="set":
                 user = cmd[1]
                 password = " ".join(cmd[2:])
@@ -26,3 +27,9 @@ def shell():
                 print(f"User {user} logged in from {address} (bypass)")
         except Exception as e:
             print("Error:",e)
+
+def log(*args):
+    print(end="\0337",flush=True)
+    print("\r",flush=True)
+    print(*args,flush=True,end="")
+    print("sp> ",readline.get_line_buffer(),end="\0338",flush=True)

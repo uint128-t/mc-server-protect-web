@@ -1,14 +1,20 @@
 import os
 import socket
+import threading
 
 from .protocol import *
 from .nbt import *
-from . import login,shell,webserv
+from . import console, login,webserv,config
 
 with open("statusping.json","r") as r:
     status_ping = r.read()
 
+connection_lock = threading.Lock()
+connection_count = {} # address: count
+connections=0
+
 def client2serv(client,server):
+    global connections
     try:
         # Read the handshake
         packlen = read_varint(client)
@@ -64,7 +70,12 @@ def client2serv(client,server):
     except:
         client.close()
         server.close()
-        return
+        with connection_lock:
+            addr = client.getpeername()[0]
+            connection_count[addr]-=1
+            if connection_count[addr]==0:
+                del connection_count[addr]
+            connections-=1
 
 def unidirectional_proxy(src,dst):
     src.settimeout(120)
@@ -87,9 +98,8 @@ def proxy_client(conn):
     threading.Thread(target=client2serv,args=(conn,proxy),daemon=True).start()
     threading.Thread(target=unidirectional_proxy,args=(proxy,conn),daemon=True).start()
 
-conn_ips = set()
-
 def runx(port):
+    global connections
     HOST = "0.0.0.0"
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -98,6 +108,13 @@ def runx(port):
         print(f"Server listening on port {HOST}:{port}")
         while True:
             conn, addr = s.accept()
+            with connection_lock:
+                if connections >= config.MAX_CONNECTIONS or connection_count.get(addr[0],0) >= config.MAX_IP_CONNECTIONS:
+                    print(f"Too many connections from {addr[0]}")
+                    conn.close()
+                    continue
+                connection_count[addr[0]] = connection_count.get(addr[0],0) + 1
+                connections+=1
             conn.settimeout(5)
             print(f"Request from {addr}")
             proxy_client(conn)
@@ -106,5 +123,5 @@ def runx(port):
 PORT = int(os.environ.get("PORT",25565))
 print(f"Starting server on port {PORT}")
 threading.Thread(target=runx,args=(PORT,),daemon=True).start()
-threading.Thread(target=shell.shell,daemon=True).start()
+threading.Thread(target=console.prompt,daemon=True).start()
 app = webserv.app
