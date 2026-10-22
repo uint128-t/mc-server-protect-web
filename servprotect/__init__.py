@@ -61,11 +61,13 @@ def client2serv(client,server,addr):
         else:
             disconnect_packet = (
                 w_u8(TAG_Compound) +
-                nbt_string("text","Login failed: Please login with the web interface")+
+                nbt_string("text",f"Login failed: Please login at http://{server_address}:{config.WEB_PORT}")+
                 nbt_string("color","red")+
                 w_u8(TAG_End)
             )
-            send_packet(server,0x02, disconnect_packet)
+            send_packet(server,0x00, disconnect_packet)
+    except:
+        pass
     finally:
         client.close()
         server.close()
